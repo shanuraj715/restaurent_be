@@ -1,7 +1,9 @@
+require('./config/global')
 const app = require('./app');
 const connectDB = require('./config/db');
 
-const PORT = process.env.PORT || 5000;
+
+const PORT = process.env.PORT || 3030;
 
 // Connect to Database
 connectDB();
