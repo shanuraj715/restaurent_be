@@ -3,6 +3,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const AdminUser = require('../../models/AdminUser');
 const router = express.Router();
+const { hashPassword, generateOTP, encrypt, successResp, failResp, decrypt } = require('../../utils/index');
+const { errorData } = require('../../utils/errorCodes');
+const { DEFAULT_USER_ROLE } = require('../../../constants');
 
 // Registration Route
 exports.register = async (req, res) => {
@@ -13,11 +16,12 @@ exports.register = async (req, res) => {
         // Check if user already exists
         const existingUser = await AdminUser.findOne({ $or: [{ email }, { mobile }] });
         if (existingUser) {
-            return res.status(400).json({ message: 'Email or Mobile already exists' });
+            const _errorData = errorData['USER_ALREADY_EXISTS'];
+            return failResp(res, _errorData.status, _errorData.message, _errorData.code);
         }
 
         // Hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await hashPassword(password);
 
         // Create new admin user
         const newUser = new AdminUser({
@@ -25,14 +29,29 @@ exports.register = async (req, res) => {
             email,
             password: hashedPassword,
             mobile,
-            role: role || 'manager',
+            role: role || DEFAULT_USER_ROLE,
         });
 
-        await newUser.save();
-        res.status(201).json({ message: 'User registered successfully' });
+        const data = await newUser.save();
+        if (!data._id) {
+            const _errorData = errorData['DB_WRITE_ERROR'];
+            return failResp(res, _errorData.status, "Something went wrong.", _errorData.code);
+        }
+
+        const responseData = {
+            token: encrypt({
+                email: email,
+                name: name,
+                mobile: mobile,
+            })
+        }
+        return successResp(res, 201, responseData, 'User registered successfully');
+
     } catch (error) {
-        console.log(error)
-        res.status(500).json({ message: 'Server error', error: error.message });
+        // console.log(error)
+        // res.status(500).json({ message: 'Server error', error: error.message });
+        const _errorData = errorData['SERVER_ERROR'];
+        return failResp(res, _errorData.status, _errorData.message, _errorData.code);
     }
 };
 

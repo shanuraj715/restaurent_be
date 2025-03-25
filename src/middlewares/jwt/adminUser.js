@@ -1,14 +1,21 @@
 const jwt = require('jsonwebtoken');
 
-const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
-const EXPIRATION_TIME = '1h'; // Token expires in 1 hour
+const SECRET_KEY = process.env.JWT_SECRET || 'abc';
+const EXPIRATION_TIME = '24h'; // Token expires in 1 hour
 
 // Function to generate a JWT token
 const generateToken = (user) => {
     return jwt.sign(
-        { id: user._id, email: user.email },
+        {
+            id: user._id,
+            email: user.email,
+            role: user.role,
+            name: user.name,
+        },
         SECRET_KEY,
-        { expiresIn: EXPIRATION_TIME }
+        {
+            expiresIn: EXPIRATION_TIME
+        }
     );
 };
 
@@ -22,10 +29,14 @@ const verifyToken = (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, SECRET_KEY);
-        req.user = decoded; // Attach user data to request object
+        req.tokenUserData = decoded; // Attach user data to request object
         next();
     } catch (error) {
-        return res.status(403).json({ message: "Invalid or expired token." });
+        if (error.name === "TokenExpiredError") {
+            return res.status(403).json({ message: "Token expired. Please login again." });
+        } else {
+            return res.status(403).json({ message: "Invalid token." });
+        }
     }
 };
 
