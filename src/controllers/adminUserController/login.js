@@ -23,9 +23,16 @@ exports.login = async (req, res) => {
       return failResp(res, errData.status, errData.message, errData.code);
     }
 
-    const isAccountActivated = user.isActive;
-    if (!isAccountActivated) {
-      const errData = errorData["INVALID_CREDENTIALS"];
+    const { isActive } = user;
+    if (!isActive) {
+      const errData = errorData["ACCOUNT_NOT_ACTIVATED"];
+      // @TODO: SEND OTP AND THEN SEND RESPONSE TO CLIENT.
+      return failResp(res, errData.status, errData.message, errData.code);
+    }
+
+    const { isBlocked } = user;
+    if (isBlocked) {
+      const errData = errorData["ACCOUNT_BLOCKED"];
       return failResp(res, errData.status, errData.message, errData.code);
     }
 
