@@ -3,6 +3,7 @@ const LoginLog = require("../../models/logs/login");
 const { failResp, verifyPassword, successResp } = require("../../utils");
 const { errorData } = require("../../utils/errorCodes");
 const { generateToken } = require("../../middlewares/jwt/adminUser");
+const validator = require("validator");
 
 const saveLoginLogIntoDB = async (user, req, success, message = "") => {
   // Log login details into database
@@ -17,9 +18,13 @@ const saveLoginLogIntoDB = async (user, req, success, message = "") => {
 };
 
 // Login Route
-exports.login = async (req, res) => {
+exports.checkLogin = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, token } = req.body;
+    if (!email || !token) {
+      const errData = errorData["INVALID_CREDENTIALS"];
+      return failResp(res, errData.status, errData.message, errData.code);
+    }
 
     // Find user by email
     const user = await AdminUser.findOne({ email });
@@ -28,44 +33,13 @@ exports.login = async (req, res) => {
       return failResp(res, errData.status, errData.message, errData.code);
     }
 
-    // Compare password
-    // const isMatch = await bcrypt.compare(password, user.password);
-    const isMatch = await verifyPassword(password, user.password);
-    console.log(isMatch);
-    if (!isMatch) {
-      const errData = errorData["INVALID_CREDENTIALS"];
-      // await saveLoginLogIntoDB(user, req, false, "Incorrect Password");
+    // // check if token is present in the user document
+    const tokenObject = user.tokens?.find((_token) => _token.token === token);
+    if (!user.tokens || tokenObject.isExpired) {
+      const errData = errorData["INVALID_OR_EXPIRED_TOKEN"];
       return failResp(res, errData.status, errData.message, errData.code);
     }
 
-    const { isActive } = user;
-    if (!isActive) {
-      const errData = errorData["ACCOUNT_NOT_ACTIVATED"];
-      // @TODO: SEND OTP AND THEN SEND RESPONSE TO CLIENT.
-      // await saveLoginLogIntoDB(user, req, false, "Account Not Active");
-      return failResp(res, errData.status, errData.message, errData.code);
-    }
-
-    const { isBlocked } = user;
-    if (isBlocked) {
-      const errData = errorData["ACCOUNT_BLOCKED"];
-      // await saveLoginLogIntoDB(user, req, false, "Account Blocked");
-      return failResp(res, errData.status, errData.message, errData.code);
-    }
-
-    // Generate JWT token
-    const token = generateToken(user);
-
-    // Save token in database
-    const tokenData = {
-      token,
-      isExpired: false,
-      expiredAt: null,
-    };
-    user.tokens.push(tokenData);
-    user.lastLogin = new Date();
-    await user.save();
-    // await saveLoginLogIntoDB(user, req, true, "Login Success");
     const data = {
       name: user.name,
       email: user.email,
@@ -75,7 +49,7 @@ exports.login = async (req, res) => {
       lastLogin: user.lastLogin,
       userId: user._id,
     };
-    return successResp(res, 200, { ...data, token }, "Login successful");
+    return successResp(res, 200, { token, ...data }, "Login successful");
   } catch (error) {
     // res.status(500).json({ message: "Server error", error: error.message });
     // await saveLoginLogIntoDB(user, req, false, "Server Error");

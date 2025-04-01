@@ -6,6 +6,7 @@ const errorCodes = {
   INVALID_CREDENTIALS: "INVALID_CREDENTIALS",
   ACCOUNT_NOT_ACTIVATED: "ACCOUNT_NOT_ACTIVATED",
   ACCOUNT_BLOCKED: "ACCOUNT_BLOCKED",
+  INVALID_OR_EXPIRED_TOKEN: "INVALID_OR_EXPIRED_TOKEN",
 };
 
 const errorData = {
@@ -38,6 +39,11 @@ const errorData = {
     code: "ACCOUNT_BLOCKED",
     message: "Account blocked. Please contact the support person.",
     status: 403,
+  },
+  [errorCodes["INVALID_OR_EXPIRED_TOKEN"]]: {
+    code: "INVALID_OR_EXPIRED_TOKEN",
+    message: "Invalid or expired token",
+    status: 401,
   },
 };
 

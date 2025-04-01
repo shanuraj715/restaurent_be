@@ -1,5 +1,6 @@
-const { failResp, failResponseObject } = require("../../utils");
+const { failResp } = require("../../utils");
 const rateLimit = require("express-rate-limit");
+const validator = require("validator");
 
 // Middleware for validation
 const validateRegistration = (req, res, next) => {
@@ -12,14 +13,14 @@ const validateRegistration = (req, res, next) => {
       "INVALID_NAME"
     );
   }
-  if (!email || !/.+\@.+\..+/.test(email)) {
+  if (!email || !validator.isEmail(email)) {
     return failResp(res, 400, "Invalid email format", "INVALID_EMAIL");
   }
-  if (!password || password.length < 6) {
+  if (!password || password.length < 8) {
     return failResp(
       res,
       400,
-      "Password must be at least 6 characters long",
+      "Password must be at least 8 characters long",
       "INVALID_PASSWORD"
     );
   }
@@ -32,29 +33,53 @@ const validateRegistration = (req, res, next) => {
   next();
 };
 
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Max 5 attempts per IP
-  legacyHeaders: false,
-  standardHeaders: true,
-
-  handler: (req, res, next, options) => {
-    const respData = {
-      limit: options.max,
-      remaining: Math.max(0, options.max - req.rateLimit.remaining),
-      retryAfter: options.windowMs,
-    };
+const loginDataValidator = (req, res, next) => {
+  const { email, password } = req.body;
+  if (!email || !validator.isEmail(email)) {
+    return failResp(res, 400, "Invalid email format", "INVALID_EMAIL");
+  }
+  if (!password || password.length < 8) {
     return failResp(
       res,
-      403,
-      "Too many login attempts, please try again later.",
-      "TOO_MANY_LOGIN_ATTEMPTS",
-      respData
+      400,
+      "Password must be at least 8 characters long",
+      "INVALID_PASSWORD"
     );
-  },
-});
+  }
+  next();
+};
+
+const rateLimiter = (limit = process.env.LOGIN_LIMIT, ms = 15 * 60 * 1000) => {
+  return rateLimit({
+    windowMs: ms,
+    max: limit, // Max 5 attempts per IP
+    legacyHeaders: false,
+    standardHeaders: true,
+
+    handler: (req, res, next, options) => {
+      const respData = {
+        limit: options.max,
+        remaining: Math.max(0, options.max - req.rateLimit.remaining),
+        retryAfter: options.windowMs,
+      };
+      return failResp(
+        res,
+        403,
+        "Too many login attempts, please try again later.",
+        "TOO_MANY_LOGIN_ATTEMPTS",
+        respData
+      );
+    },
+  });
+};
+
+const loginLimiter = rateLimiter();
+
+const loginCheckLimiter = rateLimiter(200);
 
 module.exports = {
-  validateRegistration,
+  loginCheckLimiter,
   loginLimiter,
+  validateRegistration,
+  loginDataValidator,
 };
