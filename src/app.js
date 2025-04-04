@@ -3,7 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 const rateLimit = require("express-rate-limit");
 const { failResp } = require("./utils");
-const { verifyToken } = require("./middlewares/jwt/adminUser");
+const { verifyToken } = require("./middlewares/Admin/jwt/adminUser");
 
 const app = express();
 
@@ -23,8 +23,8 @@ app.use(cors());
 
 // Routes
 // app.use('/api/auth', require('./routes/authRoutes'));
-app.use("/api/adminUser", require("./routes/AdminUser/adminUserRoutes")); // login register
-app.use("/api/admin", require("./routes/AdminUser/index"));
+app.use("/api/adminUser", require("./routes/Admin/auth/adminUserRoutes")); // login register
+app.use("/api/admin", require("./routes/Admin/index"));
 
 app.use("*", (req, res) => {
   return failResp(res, 404, "Route not found", "ROUTE_NOT_FOUND");

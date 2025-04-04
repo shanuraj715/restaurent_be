@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { failResp } = require("../../utils");
+const { failResp } = require("../../../utils");
 
 const SECRET_KEY = process.env.JWT_SECRET || "abc";
 const EXPIRATION_TIME = "24h"; // Token expires in 1 hour

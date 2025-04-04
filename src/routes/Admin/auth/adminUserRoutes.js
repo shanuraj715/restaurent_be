@@ -1,16 +1,14 @@
 const express = require("express");
 // const { register, login } = require('../controllers/authController');
-const { register } = require("../../controllers/adminUserController/register");
-const { login } = require("../../controllers/adminUserController/login");
-const {
-  checkLogin,
-} = require("../../controllers/adminUserController/checkLogin");
+const { register } = require("../../../controllers/Admin/auth/register");
+const { login } = require("../../../controllers/Admin/auth/login");
+const { checkLogin } = require("../../../controllers/Admin/auth/checkLogin");
 const {
   validateRegistration,
   loginDataValidator,
   loginLimiter,
   loginCheckLimiter,
-} = require("../../middlewares/adminUser/adminUserMiddleware");
+} = require("../../../middlewares/Admin/adminUser/adminUserMiddleware");
 
 const router = express.Router();
 

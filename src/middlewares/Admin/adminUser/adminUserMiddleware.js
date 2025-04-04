@@ -1,4 +1,4 @@
-const { failResp } = require("../../utils");
+const { failResp } = require("../../../utils");
 const rateLimit = require("express-rate-limit");
 const validator = require("validator");
 

@@ -1,5 +1,5 @@
 const express = require("express");
-const { verifyToken } = require("../../middlewares/jwt/adminUser");
+const { verifyToken } = require("../../middlewares/Admin/jwt/adminUser");
 const adminMenuList = require("./adminMenuList");
 const updateSettings = require("./updateSettings");
 

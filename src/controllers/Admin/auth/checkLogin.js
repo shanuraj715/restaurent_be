@@ -1,8 +1,8 @@
-const AdminUser = require("../../models/AdminUser");
-const LoginLog = require("../../models/logs/login");
-const { failResp, verifyPassword, successResp } = require("../../utils");
-const { errorData } = require("../../utils/errorCodes");
-const { generateToken } = require("../../middlewares/jwt/adminUser");
+const AdminUser = require("../../../models/Admin/AdminUser");
+const LoginLog = require("../../../models/Admin/logs/login");
+const { failResp, verifyPassword, successResp } = require("../../../utils");
+const { errorData } = require("../../../utils/errorCodes");
+const { generateToken } = require("../../../middlewares/Admin/jwt/adminUser");
 const validator = require("validator");
 
 const saveLoginLogIntoDB = async (user, req, success, message = "") => {
