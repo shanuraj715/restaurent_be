@@ -27,7 +27,9 @@ exports.checkLogin = async (req, res) => {
     }
 
     // Find user by email
-    const user = await AdminUser.findOne({ email });
+    // const user = await AdminUser.findOne({ email });
+    const user = req.tokenUserData; // fetched from DB from JWT middleware.
+    console.log(user);
     if (!user) {
       const errData = errorData["INVALID_CREDENTIALS"];
       return failResp(res, errData.status, errData.message, errData.code);
@@ -35,7 +37,7 @@ exports.checkLogin = async (req, res) => {
 
     // // check if token is present in the user document
     const tokenObject = user.tokens?.find((_token) => _token.token === token);
-    if (!user.tokens || tokenObject.isExpired) {
+    if (!user.tokens || tokenObject?.isExpired) {
       const errData = errorData["INVALID_OR_EXPIRED_TOKEN"];
       return failResp(res, errData.status, errData.message, errData.code);
     }

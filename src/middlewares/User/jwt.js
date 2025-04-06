@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
-const { failResp } = require("../../../utils");
-const AdminUser = require("../../../models/Admin/AdminUser");
+const { failResp } = require("../../utils");
+const CustomerAccountModal = require("../../models/User/User");
 
 const SECRET_KEY = process.env.JWT_SECRET || "abc";
 const EXPIRATION_TIME = "24h"; // Token expires in 1 hour
@@ -11,7 +11,7 @@ const generateToken = (user) => {
     {
       id: user._id,
       email: user.email,
-      role: user.role,
+      role: user.role ?? "customer",
       name: user.name,
     },
     SECRET_KEY,
@@ -36,19 +36,21 @@ const verifyToken = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
-    const user = await AdminUser.findById(decoded.id);
+    const user = await CustomerAccountModal.findById(decoded.id);
+
     if (!user || !user.isActive || user.isBlocked) {
       return failResp(
         res,
         403,
-        "Access denied. Invalid token.",
-        "INVALID_TOKEN",
+        "Account status is not active or is blocked.",
+        "ACCESS_BLOCKED",
         {
           isActive: user?.isActive,
           isBlocked: user?.isBlocked,
         }
       );
     }
+
     req.tokenUserData = user; // Attach user data to request object
     next();
   } catch (error) {

@@ -1,6 +1,8 @@
 const bcrypt = require("bcryptjs");
 const otpGenerator = require("otp-generator");
 const crypto = require("crypto");
+const AuditLog = require("../models/Admin/AuditLog/AuditLog");
+const mongoose = require("mongoose");
 
 /**
  * Hashes a password using bcrypt.
@@ -72,13 +74,27 @@ const failResponseObject = (message, errorCode, data, statusCode) => {
   };
 };
 
-const successResp = (res, statusCode, data, message, callback) => {
-  let _message = message;
-  if (typeof message !== "string") {
-    // throw new Error("Message must be a string");
-    _message = "";
-  }
+const successResp = (res, statusCode, data, message, options) => {
+  const { callback, cookies = [] } = options || {};
+  let _message = typeof message === "string" ? message : "";
+
   callback?.();
+
+  // Set multiple cookies if cookies is an array
+  if (Array.isArray(cookies)) {
+    cookies.forEach(({ name, value, options = {} }) => {
+      if (name && value) {
+        const defaultOptions = {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "Strict",
+          ...options,
+        };
+        res.cookie(name, value, defaultOptions);
+      }
+    });
+  }
+
   return res
     .status(statusCode)
     .json(successResponseObject(_message, data, statusCode));
@@ -103,6 +119,45 @@ const failResp = (
     .json(failResponseObject(_message, errorCode, data, statusCode));
 };
 
+const logDbTransaction = async (
+  action,
+  collectionName,
+  documentId,
+  performedBy,
+  description
+) => {
+  const data = {
+    action,
+    collectionName,
+    documentId,
+    performedBy,
+    description,
+  };
+  try {
+    await AuditLog.create(data);
+  } catch (error) {
+    console.error("Failed to log DB transaction", error);
+  }
+};
+
+const sendOtpViaSMS = async (mobileNumber, countryCode = "+91") => {
+  const otp = generateOTP();
+  // TODO: Implement your SMS sending logic here
+  console.log("Sending OTP via SMS", otp);
+  return otp;
+};
+
+const sendOtpViaEmail = async (emailAddress) => {
+  const otp = generateOTP();
+  // TODO: Implement your email sending logic here
+  console.log("Sending OTP via Email", otp);
+  return otp;
+};
+
+const isValidObjectId = (id) => {
+  return mongoose.Types.ObjectId.isValid(id);
+};
+
 module.exports = {
   decrypt,
   encrypt,
@@ -113,4 +168,8 @@ module.exports = {
   successResp,
   successResponseObject,
   verifyPassword,
+  logDbTransaction,
+  sendOtpViaSMS,
+  sendOtpViaEmail,
+  isValidObjectId,
 };

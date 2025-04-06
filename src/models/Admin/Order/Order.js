@@ -3,12 +3,28 @@ const mongoose = require("mongoose");
 const orderSchema = new mongoose.Schema(
   {
     customerId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "CustomerAccount", // 👈 Reference your customer model
       required: true,
     },
-    items: {
-      type: Array,
-      required: true,
+    items: [
+      {
+        id: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Item", // 👈 Reference Item model
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+          default: 1,
+        },
+      },
+    ],
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "AdminUser", // or Staff depending on your design
+      default: null,
     },
     orderDate: {
       type: Date,
@@ -16,7 +32,7 @@ const orderSchema = new mongoose.Schema(
     },
     orderStatus: {
       type: String,
-      enum: ["pending", "success", "delivered", "on_way"],
+      enum: ["pending", "success", "delivered", "on_way", "cancelled"],
       default: "pending",
     },
     paymentStatus: {
@@ -35,15 +51,9 @@ const orderSchema = new mongoose.Schema(
     },
     tableNumber: {
       type: String,
-      required: function () {
-        // return this.orderType === "dine_in";
-        return false;
-      },
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("Order", orderSchema);

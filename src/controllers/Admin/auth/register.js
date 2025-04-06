@@ -1,15 +1,20 @@
+/**
+ * create users for Admin panerl.
+ * This file is not for customer account registration.
+ */
+
 const express = require("express");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+// const bcrypt = require("bcryptjs");
+// const jwt = require("jsonwebtoken");
 const AdminUser = require("../../../models/Admin/AdminUser");
-const router = express.Router();
+// const router = express.Router();
 const {
   hashPassword,
-  generateOTP,
+  // generateOTP,
   encrypt,
   successResp,
   failResp,
-  decrypt,
+  // decrypt,
 } = require("../../../utils/index");
 const { errorData } = require("../../../utils/errorCodes");
 const { DEFAULT_USER_ROLE } = require("../../../../constants");

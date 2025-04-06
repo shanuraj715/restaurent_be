@@ -65,8 +65,8 @@ const rateLimiter = (limit = process.env.LOGIN_LIMIT, ms = 15 * 60 * 1000) => {
       return failResp(
         res,
         403,
-        "Too many login attempts, please try again later.",
-        "TOO_MANY_LOGIN_ATTEMPTS",
+        "Too many attempts, please try again later.",
+        "TOO_MANY_ATTEMPTS",
         respData
       );
     },
@@ -79,7 +79,7 @@ const loginCheckLimiter = rateLimiter(200);
 
 module.exports = {
   loginCheckLimiter,
+  loginDataValidator,
   loginLimiter,
   validateRegistration,
-  loginDataValidator,
 };

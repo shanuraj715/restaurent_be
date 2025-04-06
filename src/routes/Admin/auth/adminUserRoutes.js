@@ -9,11 +9,12 @@ const {
   loginLimiter,
   loginCheckLimiter,
 } = require("../../../middlewares/Admin/adminUser/adminUserMiddleware");
+const { verifyToken } = require("../../../middlewares/Admin/jwt/adminUser");
 
 const router = express.Router();
 
 router.post("/register", validateRegistration, register);
 router.post("/login", loginLimiter, loginDataValidator, login);
-router.post("/checkLogin", loginCheckLimiter, checkLogin);
+router.post("/checkLogin", loginCheckLimiter, verifyToken, checkLogin);
 
 module.exports = router;
