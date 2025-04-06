@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const cors = require("cors");
 require("dotenv").config();
 // const rateLimit = require("express-rate-limit");
@@ -6,6 +7,8 @@ const { failResp } = require("./utils");
 // const { verifyToken } = require("./middlewares/Admin/jwt/adminUser");
 
 const app = express();
+
+app.use("/assets", express.static(path.join(__dirname, "..", "assets")));
 
 // const limiter = rateLimit({
 //     windowMs: 15 * 60 * 1000, // 15 minutes
