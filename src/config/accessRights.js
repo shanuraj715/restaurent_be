@@ -34,6 +34,10 @@ const ACCESS_RIGHTS = {
   GET_ALL_SETTINGS: ["admin", "user"],
   GET_ALL_LOGIN_LOGS: ["admin"],
   GET_LOGIN_LOG: ["admin"],
+
+  // Website Settings Permissions
+  GET_WEBSITE_SETTINGS: [],
+  UPDATE_WEBSITE_SETTINGS: ["admin"],
 };
 
 module.exports = ACCESS_RIGHTS;

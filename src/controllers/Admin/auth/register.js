@@ -17,7 +17,7 @@ const {
   // decrypt,
 } = require("../../../utils/index");
 const { errorData } = require("../../../utils/errorCodes");
-const { DEFAULT_USER_ROLE } = require("../../../../constants");
+const { DEFAULT_USER_ROLE } = require("../../../constants");
 
 // Registration Route
 exports.register = async (req, res) => {

@@ -1,7 +1,7 @@
 const CustomerAccountModel = require("../../../models/User/User");
 const bcrypt = require("bcryptjs");
 const { failResp, successResp, logDbTransaction } = require("../../../utils");
-const { generateToken } = require("../../../middlewares/User/jwt");
+const { generateToken } = require("../../../middlewares/jwt");
 
 exports.login = async (req, res) => {
   try {

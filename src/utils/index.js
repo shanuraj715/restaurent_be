@@ -3,6 +3,8 @@ const otpGenerator = require("otp-generator");
 const crypto = require("crypto");
 const AuditLog = require("../models/Admin/AuditLog/AuditLog");
 const mongoose = require("mongoose");
+const fs = require("fs");
+const path = require("path");
 
 /**
  * Hashes a password using bcrypt.
@@ -124,17 +126,19 @@ const logDbTransaction = async (
   collectionName,
   documentId,
   performedBy,
-  description
+  description,
+  data
 ) => {
-  const data = {
+  const dataForDB = {
     action,
     collectionName,
     documentId,
     performedBy,
     description,
+    data,
   };
   try {
-    await AuditLog.create(data);
+    await AuditLog.create(dataForDB);
   } catch (error) {
     console.error("Failed to log DB transaction", error);
   }
@@ -158,6 +162,66 @@ const isValidObjectId = (id) => {
   return mongoose.Types.ObjectId.isValid(id);
 };
 
+/**
+ * Deletes a file from disk.
+ * @param {string} filePath - Absolute path of the file to delete
+ */
+const deleteFile = (filePath) => {
+  if (fs.existsSync(filePath)) {
+    try {
+      fs.unlinkSync(filePath);
+      // console.log(`Deleted file: ${filePath}`);
+    } catch (err) {
+      console.error(`Failed to delete file: ${filePath}`, err);
+    }
+  }
+};
+
+/**
+ * Removes the base project path from image file paths.
+ * @param {Array} images - Array of image objects with a `path` property.
+ * @param {string} basePath - The base path to remove.
+ * @returns {Array} updated image array
+ */
+const stripBasePathFromImages = (
+  imagePath,
+  basePath = process.env.ASSETS_BASE_PATH || ""
+) => {
+  return path.relative(basePath, imagePath).replace(/\\/g, "/");
+};
+
+const getUrlFromImagePath = (imagePath) => {
+  const baseUrl = process.env.BASE_URL || "http://localhost:3000/";
+  return `${baseUrl}${process.env.ASSETS_DIRECTORY_NAME}/${imagePath}`;
+};
+
+/**
+ * Parses a Mongoose validation error and returns a standardized response object.
+ * @param {Object} error - Mongoose ValidationError instance
+ * @returns {Object} { code, message, fields }
+ */
+const parseMongooseValidationError = (error) => {
+  if (!error || error.name !== "ValidationError") {
+    return {
+      code: "UNKNOWN_VALIDATION_ERROR",
+      message: "An unknown validation error occurred.",
+      fields: {},
+    };
+  }
+
+  const fields = {};
+
+  for (const [field, err] of Object.entries(error.errors)) {
+    fields[field] = err.message;
+  }
+
+  return {
+    code: "VALIDATION_ERROR",
+    message: "Validation failed for one or more fields.",
+    fields, // e.g., { 'src.0.size': "`default` is not a valid enum value for path `size`." }
+  };
+};
+
 module.exports = {
   decrypt,
   encrypt,
@@ -172,4 +236,8 @@ module.exports = {
   sendOtpViaSMS,
   sendOtpViaEmail,
   isValidObjectId,
+  deleteFile,
+  stripBasePathFromImages,
+  getUrlFromImagePath,
+  parseMongooseValidationError
 };

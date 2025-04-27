@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { USER_TYPES, DEFAULT_USER_ROLE } = require("../../../constants");
+const { USER_TYPES, DEFAULT_USER_ROLE } = require("../../constants");
 
 const AdminUserSchema = new mongoose.Schema(
   {

@@ -2,7 +2,7 @@ const AdminUser = require("../../../models/Admin/AdminUser");
 const LoginLog = require("../../../models/Admin/logs/login");
 const { failResp, verifyPassword, successResp } = require("../../../utils");
 const { errorData } = require("../../../utils/errorCodes");
-const { generateToken } = require("../../../middlewares/Admin/jwt/adminUser");
+const { generateToken } = require("../../../middlewares/jwt");
 const validator = require("validator");
 
 const saveLoginLogIntoDB = async (user, req, success, message = "") => {
@@ -29,7 +29,7 @@ exports.checkLogin = async (req, res) => {
     // Find user by email
     // const user = await AdminUser.findOne({ email });
     const user = req.tokenUserData; // fetched from DB from JWT middleware.
-    console.log(user);
+    // console.log(user);
     if (!user) {
       const errData = errorData["INVALID_CREDENTIALS"];
       return failResp(res, errData.status, errData.message, errData.code);

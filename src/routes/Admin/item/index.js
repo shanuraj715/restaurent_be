@@ -10,7 +10,7 @@ const {
   LIST,
 } = require("../../../middlewares/common/accessRights");
 
-const { verifyToken } = require("../../../middlewares/Admin/jwt/adminUser");
+const { verifyToken } = require("../../../middlewares/jwt");
 
 const router = express.Router();
 router.get("/list", accessRights(LIST.GET_ALL_CATEGORIES), getItems);

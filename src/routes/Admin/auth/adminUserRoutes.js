@@ -9,7 +9,7 @@ const {
   loginLimiter,
   loginCheckLimiter,
 } = require("../../../middlewares/Admin/adminUser/adminUserMiddleware");
-const { verifyToken } = require("../../../middlewares/Admin/jwt/adminUser");
+const { verifyToken } = require("../../../middlewares/jwt");
 
 const router = express.Router();
 

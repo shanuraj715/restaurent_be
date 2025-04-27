@@ -24,6 +24,10 @@ const dbTransactionSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    data: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
   },
   {
     timestamps: true,

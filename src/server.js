@@ -8,15 +8,16 @@ const connectDB = require("./config/db");
 const PORT = process.env.PORT || 3030;
 
 const imagePaths = [
-  "assets/images/items",
-  "assets/images/users",
-  "assets/images/app",
+  process.env.UPLOADS_TEMP_PATH,
+  process.env.PROFILE_PIC_PATH,
+  process.env.ITEM_IMAGE_PATH,
+  process.env.APP_IMAGES_PATH,
 ];
 
 imagePaths.forEach((dir) => {
-  const fullPath = path.join(__dirname, "..", dir);
-  if (!fs.existsSync(fullPath)) {
-    fs.mkdirSync(fullPath, { recursive: true });
+  // const fullPath = path.join(__dirname, "..", dir);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
   }
 });
 

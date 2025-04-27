@@ -1,9 +1,10 @@
 const jwt = require("jsonwebtoken");
-const { failResp } = require("../../utils");
-const CustomerAccountModal = require("../../models/User/User");
+const { failResp } = require("../utils");
+const AdminUser = require("../models/Admin/AdminUser");
+const CustomerAccountModal = require("../models/User/User");
 
 const SECRET_KEY = process.env.JWT_SECRET || "abc";
-const EXPIRATION_TIME = "24h"; // Token expires in 1 hour
+const EXPIRATION_TIME = "24h"; // Token expires in 24 hours
 
 // Function to generate a JWT token
 const generateToken = (user) => {
@@ -23,7 +24,7 @@ const generateToken = (user) => {
 
 // Middleware to verify JWT token
 const verifyToken = async (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1]; // Bearer <token>
+  const token = (req.headers.cookie?.split('=')?.[1] ?? req.headers.authorization)?.split(" ")[1]; // Bearer <token>
 
   if (!token) {
     return failResp(
@@ -36,14 +37,21 @@ const verifyToken = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
-    const user = await CustomerAccountModal.findById(decoded.id);
+    
+    // Determine which model to use based on the role
+    let user;
+    if (decoded.role === "admin" || decoded.role === "manager") {
+      user = await AdminUser.findById(decoded.id);
+    } else {
+      user = await CustomerAccountModal.findById(decoded.id);
+    }
 
     if (!user || !user.isActive || user.isBlocked) {
       return failResp(
         res,
         403,
-        "Account status is not active or is blocked.",
-        "ACCESS_BLOCKED",
+        "Access denied. Invalid token or account status.",
+        "INVALID_TOKEN",
         {
           isActive: user?.isActive,
           isBlocked: user?.isBlocked,
@@ -52,6 +60,9 @@ const verifyToken = async (req, res, next) => {
     }
 
     req.tokenUserData = user; // Attach user data to request object
+    if (!req.body.token) {
+      req.body.token = token;
+    }
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {
@@ -68,4 +79,4 @@ const verifyToken = async (req, res, next) => {
   }
 };
 
-module.exports = { generateToken, verifyToken };
+module.exports = { generateToken, verifyToken }; 

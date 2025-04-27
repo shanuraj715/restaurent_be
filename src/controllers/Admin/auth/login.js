@@ -2,7 +2,7 @@ const AdminUser = require("../../../models/Admin/AdminUser");
 const LoginLog = require("../../../models/Admin/logs/login");
 const { failResp, verifyPassword, successResp } = require("../../../utils");
 const { errorData } = require("../../../utils/errorCodes");
-const { generateToken } = require("../../../middlewares/Admin/jwt/adminUser");
+const { generateToken } = require("../../../middlewares/jwt");
 
 const saveLoginLogIntoDB = async (user, req, success, message = "") => {
   // Log login details into database

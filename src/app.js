@@ -4,25 +4,30 @@ const cors = require("cors");
 require("dotenv").config();
 // const rateLimit = require("express-rate-limit");
 const { failResp } = require("./utils");
+const corsMiddleware = require("./middlewares/common/cors");
+// const { injectFeatureFlags } = require("./middlewares/common/featureFlags");
 // const { verifyToken } = require("./middlewares/Admin/jwt/adminUser");
 
 const app = express();
 
-app.use("/assets", express.static(path.join(__dirname, "..", "assets")));
+app.use(
+  `/${process.env.ASSETS_DIRECTORY_NAME}`,
+  express.static(process.env.ASSETS_BASE_PATH)
+);
 
-// const limiter = rateLimit({
-//     windowMs: 15 * 60 * 1000, // 15 minutes
-//     max: 100, // Limit each IP to 100 requests per windowMs
-//     message: { error: "Too many requests, please try again later." },
-//     standardHeaders: true, // Return rate limit info in headers
-//     legacyHeaders: false, // Disable X-RateLimit-* headers
-// });
-
-// app.use(limiter);
+// Custom fallback for missing images
+app.use("/uploads", (req, res) => {
+  // Set content-type based on fallback image
+  res.sendFile(process.env.NOT_FOUND_IMAGE_PATH, (err) => {
+    if (err) {
+      res.status(500).send("Error loading fallback image");
+    }
+  });
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(corsMiddleware);
 
 // Routes
 // app.use('/api/auth', require('./routes/authRoutes'));
@@ -36,6 +41,8 @@ app.use("/api/user", require("./routes/User/auth/index")); // login register
 app.use("/api/item", require("./routes/Admin/item/index"));
 
 app.use("/api/order", require("./routes/Admin/order/order"));
+
+app.use("/api/upload", require("./routes/Admin/upload/index"));
 
 app.use("*", (req, res) => {
   return failResp(res, 404, "Route not found", "ROUTE_NOT_FOUND");

@@ -51,5 +51,6 @@ Thumbs.db
 
 
 # Developer Ignores
+/temp/
 /assets/images/items/
 /assets/images/users/

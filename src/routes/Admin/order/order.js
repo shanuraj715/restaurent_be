@@ -3,7 +3,7 @@ const {
   createOrder,
   updateOrder,
 } = require("../../../controllers/Admin/order/index");
-const { verifyToken } = require("../../../middlewares/Admin/jwt/adminUser");
+const { verifyToken } = require("../../../middlewares/jwt");
 
 const router = express.Router();
 

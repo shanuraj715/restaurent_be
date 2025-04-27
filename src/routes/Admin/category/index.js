@@ -5,16 +5,20 @@ const {
   deleteCategory,
   getAllCategories,
 } = require("../../../controllers/Admin/category/index");
-const {
-  accessRights,
-  LIST,
-} = require("../../../middlewares/common/accessRights");
+const { checkPermission, PERMISSIONS } = require("../../../middlewares/common/accessControl");
 
 const router = express.Router();
 
-router.post("/create", accessRights(LIST.CREATE_CATEGORY), createCategory);
-router.delete("/delete", accessRights(LIST.DELETE_CATEGORY), deleteCategory);
-router.post("/update", accessRights(LIST.UPDATE_CATEGORY), updateCategory);
-router.get("/list", accessRights(LIST.GET_ALL_CATEGORIES), getAllCategories);
+// Create category - only admin
+router.post("/create", checkPermission(PERMISSIONS.CATEGORY.CREATE), createCategory);
+
+// Update category - only admin
+router.put("/update/:id", checkPermission(PERMISSIONS.CATEGORY.UPDATE), updateCategory);
+
+// Delete category - only admin
+router.delete("/delete/:id", checkPermission(PERMISSIONS.CATEGORY.DELETE), deleteCategory);
+
+// Get all categories - admin and user
+router.get("/list", checkPermission(PERMISSIONS.CATEGORY.READ), getAllCategories);
 
 module.exports = router;

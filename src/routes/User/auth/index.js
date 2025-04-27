@@ -4,7 +4,7 @@ const { register } = require("../../../controllers/User/auth/register");
 const { login } = require("../../../controllers/User/auth/login");
 const { fetchAccount } = require("../../../controllers/User/auth/fetchAccount");
 
-const { verifyToken } = require("../../../middlewares/User/jwt");
+const { verifyToken } = require("../../../middlewares/jwt");
 // const { login } = require("../../../controllers/Admin/auth/login");
 // const { checkLogin } = require("../../../controllers/Admin/auth/checkLogin");
 const {
